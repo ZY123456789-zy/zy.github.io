@@ -1,0 +1,498 @@
+import os
+import webbrowser
+
+
+def generate_personal_website(output_file="index.html"):
+    """生成带登录和留言功能的个人静态网页"""
+
+    # 个人信息配置
+    personal_info = {
+        "name": "个人网页",
+        "title": "周尧",
+        "email": "123456789@example.com",
+        "phone": "+86 123456789",
+        "age": "24",
+        "major": "通信工程专业学生",
+        "university": "五邑大学",
+        "introduction": """
+            <p>我是五邑大学通信工程专业的学生，我热衷于学习，探索和实践编程语言中的知识和技术，专注于探索编程语言拥有无限的可能。</p>
+            <p>通过不断地学习和实践，我慢慢的从认识编程到有一定编程基础转变。</p>
+            <p>我相信，我现在的努力是为了拓宽我以后的世界，探索、创造更加美好的未来。</p>
+        """,
+        "computer_img": "computer.jpg",  # 电脑图片
+        "university_img": "wyu.jpg",  # 五邑大学图片
+        "username": "123456",  # 登录用户名
+        "password": "123456"  # 登录密码
+    }
+
+    # HTML模板
+    html_template = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{personal_info['title']}的个人主页</title>
+    <style>
+        /* 全局左对齐样式 */
+        body, div, p, h1, h2, h3, ul, li, form, input, textarea {{
+            text-align: left;
+        }}
+
+        /* 居中文本类 */
+        .center-text {{
+            text-align: center;
+        }}
+
+        /* 图片容器样式 */
+        .image-container {{
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }}
+
+        .image-box {{
+            text-align: center;
+            margin: 15px;
+        }}
+
+        .image-box img {{
+            max-width: 300px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }}
+
+        .image-box p {{
+            margin-top: 10px;
+            font-style: italic;
+            color: #555;
+        }}
+
+        body {{
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #e6f2ff; /* 淡蓝色背景 */
+        }}
+
+        .container {{
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+
+        header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #ddd;
+        }}
+
+        .logo h1 {{
+            color: #2c3e50;
+            margin: 0;
+            text-align: left;
+        }}
+
+        nav ul {{
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            justify-content: flex-end; /* 导航栏右对齐 */
+        }}
+
+        nav ul li {{
+            margin-left: 20px;
+        }}
+
+        nav ul li a {{
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }}
+
+        nav ul li a:hover {{
+            background-color: #3498db;
+            color: white;
+        }}
+
+        .content-box {{
+            background-color: white; /* 内容区域白色 */
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }}
+
+        .section {{
+            padding: 20px 0;
+            min-height: 400px;
+        }}
+
+        .section h2 {{
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-align: left;
+        }}
+
+        .home-content {{
+            text-align: left; /* 首页内容左对齐 */
+        }}
+
+        .info-grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }}
+
+        .contact-grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }}
+
+        footer {{
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+        }}
+
+        .active {{
+            background-color: #3498db;
+            color: white !important;
+        }}
+
+        .login-form {{
+            max-width: 400px;
+            margin: 0 auto 0 0; /* 表单左对齐 */
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }}
+
+        .form-group {{
+            margin-bottom: 15px;
+            text-align: left;
+        }}
+
+        .form-group label {{
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-align: left;
+        }}
+
+        .form-group input, .form-group textarea {{
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }}
+
+        .form-group textarea {{
+            height: 100px;
+        }}
+
+        .btn {{
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }}
+
+        .btn:hover {{
+            background-color: #2980b9;
+        }}
+
+        .message-box {{
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            text-align: left;
+        }}
+
+        .success {{
+            background-color: #d4edda;
+            color: #155724;
+        }}
+
+        .error {{
+            background-color: #f8d7da;
+            color: #721c24;
+        }}
+
+        #messages {{
+            margin-top: 30px;
+        }}
+
+        .message {{
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            text-align: left;
+        }}
+
+        .message h4 {{
+            margin-top: 0;
+            color: #2c3e50;
+        }}
+
+        .message p {{
+            margin-bottom: 5px;
+        }}
+
+        .message small {{
+            color: #7f8c8d;
+        }}
+
+        .hidden {{
+            display: none;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>{personal_info['name']}</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home" class="active">首页</a></li>
+                    <li><a href="#info">个人信息</a></li>
+                    <li><a href="#contact">联系我</a></li>
+                    <li><a href="#login" id="login-link">登录</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div id="home" class="section">
+            <div class="content-box">
+                <div class="home-content">
+                    <h2 class="center-text">你好，我叫{personal_info['title']}。欢迎来到我的个人主页</h2>
+                    <div>{personal_info['introduction']}</div>
+
+                    <!-- 新增图片部分 -->
+                    <div class="image-container">
+                        <div class="image-box">
+                            <img src="{personal_info['computer_img']}" alt="编程工作环境">
+                        </div>
+                        <div class="image-box">
+                            <img src="{personal_info['university_img']}" alt="五邑大学">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="info" class="section hidden">
+            <div class="content-box">
+                <h2>个人信息</h2>
+                <div class="info-grid">
+                    <div>
+                        <h3>基本信息</h3>
+                        <p><strong>姓名:</strong> {personal_info['title']}</p>
+                        <p><strong>年龄:</strong> {personal_info['age']}</p>
+                        <p><strong>专业:</strong> {personal_info['major']}</p>
+                        <p><strong>学校:</strong> {personal_info['university']}</p>
+                    </div>
+                    <div>
+                        <h3>专业介绍</h3>
+                        <p>通信工程专业主要研究通信技术、通信系统和通信网络等方面的基础理论、组成原理和设计方法。</p>
+                        <p>主要课程包括：通信原理、数字信号处理、移动通信、光纤通信、无线网络等。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="contact" class="section hidden">
+            <div class="content-box">
+                <h2>联系我</h2>
+                <div class="contact-grid">
+                    <div>
+                        <h3>联系方式</h3>
+                        <p><strong>电话:</strong> {personal_info['phone']}</p>
+                        <p><strong>邮箱:</strong> <a href="mailto:{personal_info['email']}">{personal_info['email']}</a></p>
+                    </div>
+                    <div>
+                        <h3>留言板</h3>
+                        <form id="message-form">
+                            <div class="form-group">
+                                <label for="sender-name">您的姓名</label>
+                                <input type="text" id="sender-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="sender-email">您的邮箱</label>
+                                <input type="email" id="sender-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="message-content">留言内容</label>
+                                <textarea id="message-content" required></textarea>
+                            </div>
+                            <button type="submit" class="btn">发送留言</button>
+                        </form>
+                        <div id="message-feedback" class="message-box"></div>
+                    </div>
+                </div>
+                <div id="messages"></div>
+            </div>
+        </div>
+
+        <div id="login" class="section hidden">
+            <div class="content-box">
+                <h2>登录</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn">登录</button>
+                </form>
+                <div id="login-feedback" class="message-box"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p class="center-text">&copy; 2025 {personal_info['title']}的个人主页. 保留所有权利.</p>
+        </footer>
+    </div>
+
+    <script>
+        // 导航栏切换功能
+        document.querySelectorAll('nav a').forEach(link => {{
+            link.addEventListener('click', function(e) {{
+                e.preventDefault();
+
+                // 更新活动链接样式
+                document.querySelectorAll('nav a').forEach(a => {{
+                    a.classList.remove('active');
+                }});
+                this.classList.add('active');
+
+                // 隐藏所有部分
+                document.querySelectorAll('.section').forEach(section => {{
+                    section.classList.add('hidden');
+                }});
+
+                // 显示点击的部分
+                const targetId = this.getAttribute('href').substring(1);
+                document.getElementById(targetId).classList.remove('hidden');
+            }});
+        }});
+
+        // 登录功能
+        document.getElementById('login-form').addEventListener('submit', function(e) {{
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const feedback = document.getElementById('login-feedback');
+
+            // 这里应该是与服务器验证，但在静态页面中我们只能模拟
+            if(username === "{personal_info['username']}" && password === "{personal_info['password']}") {{
+                feedback.textContent = "登录成功！";
+                feedback.className = "message-box success";
+                feedback.style.display = "block";
+
+                // 模拟登录状态
+                localStorage.setItem('loggedIn', 'true');
+                document.getElementById('login-link').textContent = "已登录";
+
+                // 3秒后隐藏反馈信息
+                setTimeout(() => {{
+                    feedback.style.display = "none";
+                    document.getElementById('login').classList.add('hidden');
+                    document.querySelector('nav a[href="#home"]').click();
+                }}, 3000);
+            }} else {{
+                feedback.textContent = "用户名或密码错误！";
+                feedback.className = "message-box error";
+                feedback.style.display = "block";
+
+                // 3秒后隐藏反馈信息
+                setTimeout(() => {{
+                    feedback.style.display = "none";
+                }}, 3000);
+            }}
+        }});
+
+        // 留言功能
+        document.getElementById('message-form').addEventListener('submit', function(e) {{
+            e.preventDefault();
+
+            const name = document.getElementById('sender-name').value;
+            const email = document.getElementById('sender-email').value;
+            const content = document.getElementById('message-content').value;
+            const feedback = document.getElementById('message-feedback');
+
+            // 创建新的留言元素
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `
+                <h4>${{name}}</h4>
+                <p>${{content}}</p>
+                <small>邮箱: ${{email}}</small>
+                <small>时间: ${{new Date().toLocaleString()}}</small>
+            `;
+
+            // 添加到留言列表
+            document.getElementById('messages').prepend(messageDiv);
+
+            // 显示成功消息
+            feedback.textContent = "留言已发送！";
+            feedback.className = "message-box success";
+            feedback.style.display = "block";
+
+            // 清空表单
+            this.reset();
+
+            // 3秒后隐藏反馈信息
+            setTimeout(() => {{
+                feedback.style.display = "none";
+            }}, 3000);
+        }});
+
+        // 检查登录状态
+        if(localStorage.getItem('loggedIn') === 'true') {{
+            document.getElementById('login-link').textContent = "已登录";
+        }}
+
+        // 默认显示首页
+        document.querySelector('nav a[href="#home"]').click();
+    </script>
+</body>
+</html>
+"""
+
+    # 写入文件
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(html_template)
+
+    print(f"个人网页已生成: {output_file}")
+
+    # 自动在浏览器中打开
+    file_path = f"file://{os.path.abspath(output_file)}"
+    webbrowser.open(file_path)
+
+
+if __name__ == "__main__":
+    generate_personal_website()
